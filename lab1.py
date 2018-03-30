@@ -62,34 +62,31 @@ tosses = [
 "01000000001111100001101000001001001100101001011001110011100100011101011111001101001000111000100101101101100011011100100001011110000101000010111001110001010011110111111111011011011111010001000100101010"]
 
 
-#import matplotlib.pyplot as plt
-#plt.plot([1,2,3,4])
-#plt.ylabel('some numbers')
-#plt.show()
-
+import matplotlib.pyplot as plt
+#python -mpip install -U pip
+#python -mpip install -U matplotlib
 
 def fifty_fifty_rate():
-	one_zero_rate = []
+	zero_rate = []
 	human = []
 
 	for toss in tosses:
 		zero_count = 0
-		one_count = 0
+		#one_count = 0
 		for num in toss:
 			#print(type(num))
 			if num == '0':
 				zero_count += 1
-			elif num == '1':
-				one_count += 1
-		one_zero_rate.append((zero_count, one_count))
+			#elif num == '1':
+				#one_count += 1
+		zero_rate.append(zero_count)
 		if abs(zero_count - 100) > 10:
 			human.append(tosses.index(toss))
 			
-	print(one_zero_rate)
-	print(human)
+	return zero_rate
 	
 	
-def in_a_row():
+def consecutive():
 	
 	toss_sequences = []
 	same_count = 1
@@ -111,23 +108,43 @@ def in_a_row():
 		toss_sequences.append(sequences)
 	
 	
-	occs = []
+	cons = []
 	
 	for sequence in toss_sequences:
-		occ = {}
+		con = {}
 		for num in sequence:
-			if num not in occ:
-				occ[num] = 1
+			if num not in con:
+				con[num] = 1
 			else:
-				occ[num] += 1
-		occs.append(occ)
+				con[num] += 1
+		cons.append(con)
+
+	return cons
 	
-	print(occs)
+	#print(cons)
+
+def count_consecutive(cons, n):
+	con_ns = []
+	for con in cons:
+		if n in con.keys():
+			con_ns.append(con[n])
+		else:
+			con_ns.append(0)
+	#print(con_ns)
+	return con_ns
+
+
 	
 	
-in_a_row()
+
 	
 	
+
+plt.plot(fifty_fifty_rate(), count_consecutive(consecutive(), 7), 'ro')
+#plt.axis([0, 6, 0, 20])
+plt.ylabel('Number of consecutive sequences of 7')
+plt.xlabel('Number of zeros (of 200)')
+plt.show()
 	
 def count():
 	ones = 0
