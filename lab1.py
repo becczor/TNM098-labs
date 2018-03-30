@@ -99,7 +99,6 @@ def in_a_row():
 		# reset counter if not the same any more
 		for index, num in enumerate(toss[:-1]):
 		#https://stackoverflow.com/questions/522563/accessing-the-index-in-python-for-loops
-			#print(index)
 			if num == toss[index + 1]:
 				same_count += 1
 			else:
@@ -111,12 +110,10 @@ def in_a_row():
 
 		toss_sequences.append(sequences)
 	
-	#print(toss_sequences)
 	
 	occs = []
 	
 	for sequence in toss_sequences:
-		print(sequence)
 		occ = {}
 		for num in sequence:
 			if num not in occ:
@@ -125,16 +122,7 @@ def in_a_row():
 				occ[num] += 1
 		occs.append(occ)
 	
-	#print(occs)
-	
-	sum = 0
-	for occ in occs:
-		#for key in occ:
-			#print(key)
-			#print(occ[key])
-			#sum += int(key*occ[key])
-		#print(sum)
-		sum = 0
+	print(occs)
 	
 	
 in_a_row()
