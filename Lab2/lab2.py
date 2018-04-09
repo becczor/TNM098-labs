@@ -1,5 +1,5 @@
 #RecordingTimestamp, FixationIndex, GazeEventDuration(mS), GazePointIndex, GazePointX(px), GazePointY(px), 
-list = [127, 1, 23, 37, 555, 346, 
+data = [127, 1, 23, 37, 555, 346, 
 137, 2, 40, 40, 487, 221, 
 176, 3, 200, 52, 500, 264, 
 376, 4, 183, 112, 375, 262, 
@@ -746,6 +746,7 @@ list = [127, 1, 23, 37, 555, 346,
 
 import matplotlib.pyplot as plt
 import copy
+from sklearn.cluster import DBSCAN
 
 
 RecordingTimestamp = []
@@ -755,9 +756,9 @@ GazePointIndex = []
 GazePointX = []
 GazePointY = []
 
-def separate_data(list):
+def separate_data(data):
 	i = 1
-	for elem in list:
+	for elem in data:
 		if i == 1:
 			RecordingTimestamp.append(elem)
 		elif i == 2:
@@ -777,22 +778,71 @@ def separate_data(list):
 	return
 	
 def plot_all(x, y):
-	plt.plot(x, y, 'ro')
+	plt.plot(x, y, 'o')
 	#plt.axis([0, 6, 0, 20])
 	plt.ylabel(str(x))
 	plt.xlabel(str(y))
 	plt.show()
 	
-def plot_based_on(unsorted, x, y):
-	sorted = copy.deepcopy(unsorted)
-	sorted.sort()
-	print(sorted)
+def plot_categorized(param, x, y):
+	x_100 = []
+	x_300 = []
+	x_500 = []
+	x_750 = []
+	x_1000 = []
+	x_2000 = []
+	x_max = []
+	y_100 = []
+	y_300 = []
+	y_500 = []
+	y_750 = []
+	y_1000 = []
+	y_2000 = []
+	y_max = []
 	
-separate_data(list)
+	for i in range(0, len(param)):
+		if param[i] < 100:
+			x_100.append(x[i])
+			y_100.append(y[i])
+		elif param[i] in range(100,299):
+			x_300.append(x[i])
+			y_300.append(y[i])
+		elif param[i] in range(300, 499):
+			x_500.append(x[i])
+			y_500.append(y[i])
+		elif param[i] in range(500, 750):
+			x_750.append(x[i])
+			y_750.append(y[i])
+		elif param[i] in range(750, 999):
+			x_1000.append(x[i])
+			y_1000.append(y[i])
+		elif param[i] in range(1000,1999):
+			x_2000.append(x[i])
+			y_2000.append(y[i])
+		else:
+			x_max.append(x[i])
+			y_max.append(y[i])
+	
+	plt.plot(x_100, y_100, 'wo')
+	plt.plot(x_300, y_300, 'co')
+	plt.plot(x_500, y_500, 'ro')
+	plt.plot(x_750, y_750, 'mo')
+	plt.plot(x_1000, y_1000, 'go')
+	plt.plot(x_2000, y_2000, 'bo')
+	plt.plot(x_max, y_max, 'ko')
+	plt.ylabel("y")
+	plt.xlabel("x")
+	plt.show()
+
+
+	
+	
+	
+separate_data(data)
 
 #plot_all(GazePointX, GazePointY)
 
-plot_based_on(GazeEventDuration, GazePointX, GazePointY)
+plot_categorized(GazeEventDuration, GazePointX, GazePointY)
 
 
 
