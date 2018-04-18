@@ -63,9 +63,14 @@ tosses = [
 
 
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn import decomposition
 #python -mpip install -U pip
 #python -mpip install -U matplotlib
 
+"""
+Counts how many ones and zeros for each person.
+"""
 def fifty_fifty_rate():
 	zero_rate = []
 	human = []
@@ -85,9 +90,10 @@ def fifty_fifty_rate():
 			
 	return zero_rate
 	
-	
+"""
+Generates list of dictionaries containing number of consecuetive digits for all persons.
+"""	
 def consecutive():
-	
 	toss_sequences = []
 	same_count = 1
 	for toss in tosses:
@@ -123,6 +129,12 @@ def consecutive():
 	
 	#print(cons)
 
+"""
+Input: 
+	cons: List of dictionaries containing number of consecuetive digits
+	n: number of consecuetive digits to look for
+Output: List of number of n consecuetive digits for each person
+"""
 def count_consecutive(cons, n):
 	con_ns = []
 	for con in cons:
@@ -134,17 +146,33 @@ def count_consecutive(cons, n):
 	return con_ns
 
 
-	
-	
+"""
+Generates dataset for using in PCA.
+"""	
+def createDataset():
+	dataset = []
+	fifty_set = fifty_fifty_rate()
+	consec_2 = count_consecutive(consecutive(), 2)
+	consec_10 = count_consecutive(consecutive(), 10)
 
-	
-	
+	for f, c2, c10 in zip(fifty_set, consec_2, consec_10):
+		dataset.append([f, c2, c10])	
 
-plt.plot(fifty_fifty_rate(), count_consecutive(consecutive(), 7), 'ro')
+	return dataset
+
+def pca(dataset):
+	# Standardizing the features
+	x = StandardScaler().fit_transform(dataset)
+	print("Ok!")
+
+
+print(pca(createDataset()))	
+
+"""plt.plot(fifty_fifty_rate(), count_consecutive(consecutive(), 7), 'ro')
 #plt.axis([0, 6, 0, 20])
 plt.ylabel('Number of consecutive sequences of 7')
 plt.xlabel('Number of zeros (of 200)')
-plt.show()
+plt.show()"""
 	
 def count():
 	ones = 0
