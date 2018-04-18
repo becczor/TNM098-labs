@@ -747,6 +747,7 @@ data = [127, 1, 23, 37, 555, 346,
 import matplotlib.pyplot as plt
 import copy
 from sklearn.cluster import DBSCAN
+from sklearn import metrics
 
 
 RecordingTimestamp = []
@@ -778,7 +779,7 @@ def separate_data(data):
 	return
 	
 def plot_all(x, y):
-	plt.plot(x, y, 'o')
+	plt.scatter(x, y, marker='o', s=GazeEventDuration, edgecolor='black')
 	#plt.axis([0, 6, 0, 20])
 	plt.ylabel(str(x))
 	plt.xlabel(str(y))
@@ -834,6 +835,8 @@ def plot_categorized(param, x, y):
 	plt.xlabel("x")
 	plt.show()
 
+def cluster(data, eps, d):
+	return
 
 	
 	
