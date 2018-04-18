@@ -64,7 +64,7 @@ tosses = [
 
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn import decomposition
+from sklearn.decomposition import PCA
 #python -mpip install -U pip
 #python -mpip install -U matplotlib
 
@@ -160,13 +160,25 @@ def createDataset():
 
 	return dataset
 
-def pca(dataset):
+def perform_pca(dataset):
 	# Standardizing the features
 	x = StandardScaler().fit_transform(dataset)
+	pca = PCA(n_components=2)
+	principalComponents = pca.fit_transform(x)
+	#print(principalComponents)
 	print("Ok!")
+	pc1 = []
+	pc2 = []
+	for elem in principalComponents:
+		pc1.append(elem[0])
+		pc2.append(elem[1])
+	plt.plot(pc1, pc2, 'o')
+	plt.show()
 
 
-print(pca(createDataset()))	
+
+
+print(perform_pca(createDataset()))	
 
 """plt.plot(fifty_fifty_rate(), count_consecutive(consecutive(), 7), 'ro')
 #plt.axis([0, 6, 0, 20])
