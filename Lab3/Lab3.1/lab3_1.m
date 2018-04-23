@@ -66,12 +66,14 @@ for i = 1:12
 
 end
 
-%%
+%% Använd binärfilerna och gå igenom dem för att eventuellt hitta linjer. 
+% Börja från översta kanten och när en pixel hittas, se om det finns en
+% följande linje. 
 
 for i = 1:12
     figure
     image = rgb2gray(images{i});
-    BW = edge(image, 'approxcanny', [0.2, 0.6]);
+    BW = edge(image, 'approxcanny', [0.2, 0.7]);
     %subplot(4,3,i)
     imshow(BW);
 end 
@@ -79,6 +81,8 @@ end
 % image2 = rgb2gray(images{1});
 % BW2 = edge(image2, 'canny');
 % imshow(BW2)
+
+%%
 
 
 
