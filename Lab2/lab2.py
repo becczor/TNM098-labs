@@ -847,7 +847,7 @@ def cluster(coordinates, eps, min_samples):
 	
 separate_data(data)
 
-db = cluster(format_cluster_data(GazePointX, GazePointY), 50, 100)
+db = cluster(format_cluster_data(GazePointX, GazePointY), 60, 10)
 
 print(db)
 
