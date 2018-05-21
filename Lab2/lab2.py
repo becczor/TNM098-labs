@@ -835,18 +835,31 @@ def plot_categorized(param, x, y):
 	plt.xlabel("x")
 	plt.show()
 
-def cluster(data, eps, d):
-	return
+def format_cluster_data(lat, lon):
+	return [elem for elem in zip(lat, lon)]
+
+
+def cluster(coordinates, eps, min_samples):
+	db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
+	return db
 	#https://www.programcreek.com/python/example/103494/sklearn.cluster.DBSCAN
 
 	
-	
-	
 separate_data(data)
+
+db = cluster(format_cluster_data(GazePointX, GazePointY), 50, 100)
+
+print(db)
+
+labels = db.labels_
+print(labels)
+n_clusters_ = len(set(labels)) - (1 if -1 else 0)
+print('Estimated number of clusters: %d' % n_clusters_)
+
 
 #plot_all(GazePointX, GazePointY)
 
-plot_categorized(GazeEventDuration, GazePointX, GazePointY)
+#plot_categorized(GazeEventDuration, GazePointX, GazePointY)
 
 
 
