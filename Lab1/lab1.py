@@ -63,8 +63,12 @@ tosses = [
 
 
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
+from mpl_toolkits.mplot3d import Axes3D
+import sklearn.preprocessing as preprocessing
 from sklearn.decomposition import PCA
+from sklearn.cluster import DBSCAN
+from sklearn import metrics
+import math
 #python -mpip install -U pip
 #python -mpip install -U matplotlib
 
@@ -146,23 +150,28 @@ def count_consecutive(cons, n):
 	return con_ns
 
 
+def scale_data(d):
+	scaled_dataset = []
+	for dimension in d:
+		scaled_dataset.append([entry/max(dimension) for entry in dimension])
+	return scaled_dataset
+
+
 """
 Generates dataset for using in PCA.
 """	
 def createDataset():
-	dataset = []
 	fifty_set = fifty_fifty_rate()
-	consec_2 = count_consecutive(consecutive(), 2)
-	consec_10 = count_consecutive(consecutive(), 10)
+	consec_3 = count_consecutive(consecutive(), 3)
+	consec_7 = count_consecutive(consecutive(), 7)
 
-	for f, c2, c10 in zip(fifty_set, consec_2, consec_10):
-		dataset.append([f, c2, c10])	
-
-	return dataset
+	return (fifty_set, consec_3, consec_7)
 
 def perform_pca(dataset):
 	# Standardizing the features
+	print(dataset)
 	x = StandardScaler().fit_transform(dataset)
+	print(x)
 	pca = PCA(n_components=2)
 	principalComponents = pca.fit_transform(x)
 	#print(principalComponents)
@@ -172,13 +181,74 @@ def perform_pca(dataset):
 	for elem in principalComponents:
 		pc1.append(elem[0])
 		pc2.append(elem[1])
-	plt.plot(pc1, pc2, 'o')
+	return (pc1, pc2)
+
+# plt.plot(pc1, pc2, 'o')
+# plt.show()
+
+
+def format_data_2D(x, y):
+	return list(zip(x, y))
+
+def format_data_3D(dataset):
+	return list(zip(dataset[0], dataset[1], dataset[2]))
+
+def format_cluster_data_3D(dataset, labels):
+	return list(zip(dataset[0], dataset[1], dataset[2], labels))
+
+
+def cluster(coordinates, eps, min_samples):
+	db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
+	labels = db.labels_
+	print(labels)
+	n_clusters_ = len(set(labels)) - (1 if -1 else 0)
+	print('Estimated number of clusters: %d' % n_clusters_)
+	return db
+	#https://www.programcreek.com/python/example/103494/sklearn.cluster.DBSCAN
+
+def plot_clusters(x, y, labels):
+	plt.scatter(x, y, marker='o', edgecolor='black', c=labels)
+	#plt.axis([0, 6, 0, 20])
+	#plt.ylabel(str(x))
+	#plt.xlabel(str(y))
 	plt.show()
 
+def count_strd_dev(stdr_dev, N, fifty_set):
+	nrs = []
+	for i in range(0, len(fifty_set)):
+		if fifty_set[i] < (N/2 + stdr_dev) and fifty_set[i] > (N/2 - stdr_dev):
+			nrs.append(i)
+	return nrs
 
 
+dataset = createDataset()
+scaled_dataset = scale_data(dataset)
 
-print(perform_pca(createDataset()))	
+#pca = perform_pca(dataset)
+#print(pca[0])
+#print(pca[1])
+#data = format_data_2D(pca[0], pca[1])
+db = cluster(format_data_3D(scaled_dataset), 0.18, 18)
+labels = db.labels_
+
+
+#plot_clusters(pca[0], pca[1], labels)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(scaled_dataset[0], scaled_dataset[1], scaled_dataset[2], c=labels)
+ax.set_xlabel('X: 50/50')
+ax.set_ylabel('Y: C2')
+ax.set_zlabel('Z: C10')
+plt.show()
+
+standard_dev = math.sqrt(0.5*0.5*200)
+
+print(count_strd_dev(standard_dev, 200, fifty_fifty_rate()))
+
+
+	
+
 
 """plt.plot(fifty_fifty_rate(), count_consecutive(consecutive(), 7), 'ro')
 #plt.axis([0, 6, 0, 20])
