@@ -64,10 +64,7 @@ tosses = [
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import sklearn.preprocessing as preprocessing
-from sklearn.decomposition import PCA
 from sklearn.cluster import DBSCAN
-from sklearn import metrics
 import math
 #python -mpip install -U pip
 #python -mpip install -U matplotlib
@@ -149,7 +146,11 @@ def count_consecutive(cons, n):
 	#print(con_ns)
 	return con_ns
 
-
+"""
+Scales dataset to values between 0 and 1
+Input: dataset with one or more dimensions
+Output: scaled dataset as list of lists
+"""
 def scale_data(d):
 	scaled_dataset = []
 	for dimension in d:
@@ -158,15 +159,20 @@ def scale_data(d):
 
 
 """
-Generates dataset for using in PCA.
+Generates dataset as lists with tree different characteristics.
 """	
-def createDataset():
+def create_dataset():
 	fifty_set = fifty_fifty_rate()
 	consec_3 = count_consecutive(consecutive(), 3)
 	consec_7 = count_consecutive(consecutive(), 7)
 
 	return (fifty_set, consec_3, consec_7)
 
+"""
+Performs pca on 3D to 2D. 
+Input: dataset with three lists
+Output: two list with principal component 1 and 2
+"""
 def perform_pca(dataset):
 	# Standardizing the features
 	print(dataset)
@@ -183,20 +189,30 @@ def perform_pca(dataset):
 		pc2.append(elem[1])
 	return (pc1, pc2)
 
-# plt.plot(pc1, pc2, 'o')
-# plt.show()
 
-
+"""
+Takes two lists and zips it to one list of tuples
+"""
 def format_data_2D(x, y):
 	return list(zip(x, y))
 
+"""
+Takes dataset with three dimensions in separate lists and zips it to one list with 3-tuples.
+"""
 def format_data_3D(dataset):
 	return list(zip(dataset[0], dataset[1], dataset[2]))
 
+"""
+Takes dataset with three dimensions in separate lists and cluster labels. Zips it to one list with 4-tuples.
+"""
 def format_cluster_data_3D(dataset, labels):
 	return list(zip(dataset[0], dataset[1], dataset[2], labels))
 
-
+"""
+Clusters datapoints with DBScan.
+Input: coordinates as separate lists, epsilon and minimum points in cluster
+Output: db which contains labels on which cluster every point belongs to
+"""
 def cluster(coordinates, eps, min_samples):
 	db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
 	labels = db.labels_
@@ -206,13 +222,38 @@ def cluster(coordinates, eps, min_samples):
 	return db
 	#https://www.programcreek.com/python/example/103494/sklearn.cluster.DBSCAN
 
-def plot_clusters(x, y, labels):
+
+"""
+2D-plots clusters.
+Input: separate lists with coordinates, and list with labels
+"""
+def 2D_plot_clusters(x, y, labels):
 	plt.scatter(x, y, marker='o', edgecolor='black', c=labels)
 	#plt.axis([0, 6, 0, 20])
 	#plt.ylabel(str(x))
 	#plt.xlabel(str(y))
 	plt.show()
 
+"""
+3D-plots clusters.
+Input: dataset with three separate dimensions, list of labels
+"""
+def 3D_plot_clusters(dataset, labels):
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	ax.scatter(dataset[0], dataset[1], dataset[2], c=labels)
+	ax.set_xlabel('X: 50/50')
+	ax.set_ylabel('Y: C2')
+	ax.set_zlabel('Z: C10')
+	plt.show()
+
+
+
+"""
+Creates list with data points that are inside standard deviation
+Input: standard deviation, total number of tosses and list of number of heads for each toss
+Output: List with numbers of data points
+"""
 def count_strd_dev(stdr_dev, N, fifty_set):
 	nrs = []
 	for i in range(0, len(fifty_set)):
@@ -221,72 +262,17 @@ def count_strd_dev(stdr_dev, N, fifty_set):
 	return nrs
 
 
-dataset = createDataset()
+dataset = create_dataset()
 scaled_dataset = scale_data(dataset)
 
-#pca = perform_pca(dataset)
-#print(pca[0])
-#print(pca[1])
-#data = format_data_2D(pca[0], pca[1])
-db = cluster(format_data_3D(scaled_dataset), 0.18, 18)
+db = cluster(format_data_3D(scaled_dataset), 0.2, 16)
 labels = db.labels_
 
-
-#plot_clusters(pca[0], pca[1], labels)
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.scatter(scaled_dataset[0], scaled_dataset[1], scaled_dataset[2], c=labels)
-ax.set_xlabel('X: 50/50')
-ax.set_ylabel('Y: C2')
-ax.set_zlabel('Z: C10')
-plt.show()
+3D_plot_clusters(scaled_dataset, labels)
 
 standard_dev = math.sqrt(0.5*0.5*200)
 
+print(standard_dev)
 print(count_strd_dev(standard_dev, 200, fifty_fifty_rate()))
-
-
-	
-
-
-"""plt.plot(fifty_fifty_rate(), count_consecutive(consecutive(), 7), 'ro')
-#plt.axis([0, 6, 0, 20])
-plt.ylabel('Number of consecutive sequences of 7')
-plt.xlabel('Number of zeros (of 200)')
-plt.show()"""
-	
-def count():
-	ones = 0
-	zeros = 0 
-	c = [0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0]
-	
-	for n in c:
-		if n == 1:
-			ones += 1
-		else:
-			zeros += 1
-	
-	print(zeros, ones)
-	
-
-		
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+print(len(count_strd_dev(standard_dev, 200, fifty_fifty_rate())))
 	
