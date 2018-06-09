@@ -28,7 +28,7 @@ testImage(:,:,1) = meanVector(1,1) / 255;
 testImage(:,:,2) = meanVector(2,1) / 255;
 testImage(:,:,3) = meanVector(3,1) / 255;
 
-imshow(testImage)
+%imshow(testImage)
 
 %% Colour distribution around central point
 % Find center points in all images
@@ -43,16 +43,16 @@ end
 d = 100;
 meanCenterVector = zeros(3,12);
 for i = 1:12
-    figure
-    subplot(1,2,1)
+    %figure
+    %subplot(1,2,1)
     [meanCenterVector(1,i), meanCenterVector(2,i), meanCenterVector(3,i)] = getPointColorDist(images{i}, centers(1,i), centers(2,i), d);
     testImage = ones(d*2, d*2,3);
 
     testImage(:,:,1) = meanCenterVector(1,i) / 255;
     testImage(:,:,2) = meanCenterVector(2,i) / 255;
     testImage(:,:,3) = meanCenterVector(3,i) / 255;
-    subplot(1,2,2)
-    imshow(testImage)
+    %subplot(1,2,2)
+    %imshow(testImage)
     
 end
 
@@ -71,11 +71,11 @@ end
 % följande linje. 
 
 for i = 1:12
-    figure
+    %figure
     image = rgb2gray(images{i});
     BW = edge(image, 'approxcanny', [0.2, 0.7]);
     %subplot(4,3,i)
-    imshow(BW);
+    %imshow(BW);
 end 
 % figure 
 % image2 = rgb2gray(images{1});
