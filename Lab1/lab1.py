@@ -62,34 +62,37 @@ tosses = [
 "01000000001111100001101000001001001100101001011001110011100100011101011111001101001000111000100101101101100011011100100001011110000101000010111001110001010011110111111111011011011111010001000100101010"]
 
 
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.cluster import DBSCAN
 import math
+from adjustText import adjust_text
 #python -mpip install -U pip
 #python -mpip install -U matplotlib
 
 """
 Counts how many ones and zeros for each person.
 """
-def fifty_fifty_rate():
-	zero_rate = []
+def nr_of_tails():
+	tails = []
 	human = []
 
 	for toss in tosses:
-		zero_count = 0
+		tail_count = 0
 		#one_count = 0
 		for num in toss:
 			#print(type(num))
 			if num == '0':
-				zero_count += 1
+				tail_count += 1
 			#elif num == '1':
 				#one_count += 1
-		zero_rate.append(zero_count)
-		if abs(zero_count - 100) > 10:
+		tails.append(tail_count)
+		if abs(tail_count - 100) > 10:
 			human.append(tosses.index(toss))
 			
-	return zero_rate
+	return tails
 	
 """
 Generates list of dictionaries containing number of consecuetive digits for all persons.
@@ -162,11 +165,11 @@ def scale_data(d):
 Generates dataset as lists with tree different characteristics.
 """	
 def create_dataset():
-	fifty_set = fifty_fifty_rate()
+	consec_2 = count_consecutive(consecutive(), 2)
 	consec_3 = count_consecutive(consecutive(), 3)
-	consec_7 = count_consecutive(consecutive(), 7)
+	consec_5 = count_consecutive(consecutive(), 5)
 
-	return (fifty_set, consec_3, consec_7)
+	return (consec_2, consec_3, consec_5)
 
 """
 Performs pca on 3D to 2D. 
@@ -175,18 +178,21 @@ Output: two list with principal component 1 and 2
 """
 def perform_pca(dataset):
 	# Standardizing the features
-	print(dataset)
+	#print(dataset)
 	x = StandardScaler().fit_transform(dataset)
-	print(x)
+	#print(x)
 	pca = PCA(n_components=2)
 	principalComponents = pca.fit_transform(x)
-	#print(principalComponents)
+	variance = pca.explained_variance_ratio_
+	print(pca.components_)
+	print(variance[0] + variance[1])
 	print("Ok!")
 	pc1 = []
 	pc2 = []
 	for elem in principalComponents:
 		pc1.append(elem[0])
 		pc2.append(elem[1])
+	#print(pc1)
 	return (pc1, pc2)
 
 
@@ -225,26 +231,32 @@ def cluster(coordinates, eps, min_samples):
 
 """
 2D-plots clusters.
-Input: separate lists with coordinates, and list with labels
+Input: separate lists with coordinates, list with labels and tuple of axis labels, and color of dots
 """
-def 2D_plot_clusters(x, y, labels):
-	plt.scatter(x, y, marker='o', edgecolor='black', c=labels)
-	#plt.axis([0, 6, 0, 20])
-	#plt.ylabel(str(x))
-	#plt.xlabel(str(y))
+def plot_2D_clusters(data_x, data_y, labels, axis_labels, color):
+	plt.scatter(data_x, data_y, marker='o', edgecolor='black', c=color)
+
+	# Add labels that do not overlap
+	texts = []
+	for label, x, y in zip(labels, data_x, data_y):
+		texts.append(plt.text(x, y, label, size="7"))
+	adjust_text(texts, arrowprops=dict(arrowstyle='-'))
+
+	plt.xlabel(axis_labels[0])
+	plt.ylabel(axis_labels[1])
 	plt.show()
 
 """
 3D-plots clusters.
-Input: dataset with three separate dimensions, list of labels
+Input: dataset with three separate dimensions, list of cluster number
 """
-def 3D_plot_clusters(dataset, labels):
+def plot_3D_clusters(dataset, clusters):
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
-	ax.scatter(dataset[0], dataset[1], dataset[2], c=labels)
-	ax.set_xlabel('X: 50/50')
-	ax.set_ylabel('Y: C2')
-	ax.set_zlabel('Z: C10')
+	ax.scatter(dataset[0], dataset[1], dataset[2], c=clusters)
+	ax.set_xlabel('X: C2')
+	ax.set_ylabel('Y: C3')
+	ax.set_zlabel('Z: C5')
 	plt.show()
 
 
@@ -254,25 +266,55 @@ Creates list with data points that are inside standard deviation
 Input: standard deviation, total number of tosses and list of number of heads for each toss
 Output: List with numbers of data points
 """
-def count_strd_dev(stdr_dev, N, fifty_set):
+def within_strd_dev(stdr_dev, N):
+	tail_count = nr_of_tails()
 	nrs = []
-	for i in range(0, len(fifty_set)):
-		if fifty_set[i] < (N/2 + stdr_dev) and fifty_set[i] > (N/2 - stdr_dev):
+	for i in range(0, len(tail_count)):
+		if tail_count[i] < (N/2 + stdr_dev) and tail_count[i] > (N/2 - stdr_dev):
 			nrs.append(i)
 	return nrs
 
+"""
+Returns a dataset with the values in the positions in keep kept and the rest removed.
+Input: dataset with separate dimensions, list with indexes of elements to keep
+Output: dataset with elements removed
+"""
+def remove_non_selected(dataset, keep):
+	filtered_dataset = []
+	for dimension in dataset:
+		temp = []
+		for i in range(0, len(dimension)):
+			if i in keep:
+				temp.append(dimension[i])
+		filtered_dataset.append(temp)
+	return filtered_dataset
+
 
 dataset = create_dataset()
+
 scaled_dataset = scale_data(dataset)
 
-db = cluster(format_data_3D(scaled_dataset), 0.2, 16)
-labels = db.labels_
+strd_dev = math.sqrt(0.5*0.5*200)
+keep = within_strd_dev(strd_dev, 200)
 
-3D_plot_clusters(scaled_dataset, labels)
+filtered_scaled_dataset = remove_non_selected(scaled_dataset, keep)
+#print(len(filtered_dataset[0]))
 
-standard_dev = math.sqrt(0.5*0.5*200)
 
-print(standard_dev)
-print(count_strd_dev(standard_dev, 200, fifty_fifty_rate()))
-print(len(count_strd_dev(standard_dev, 200, fifty_fifty_rate())))
+# ***** PCA ******
+#pca = perform_pca(format_data_3D(filtered_dataset))
+#plot_2D_clusters(pca[0], pca[1], keep, ("X: Pca1", "Y:Pca2"), 'red')
+
+
+
+# ***** 2D plot of 3 dimensions *****
+plot_2D_clusters(filtered_scaled_dataset[0], filtered_scaled_dataset[1], keep, ("X: C2", "Y:C3"), 'red')
+plot_2D_clusters(filtered_scaled_dataset[0], filtered_scaled_dataset[2], keep, ("X: C2", "Y:C5"), 'blue')
+plot_2D_clusters(filtered_scaled_dataset[1], filtered_scaled_dataset[2], keep, ("X: C3", "Y:C5"), 'green')
+
+# **** Clustering ******
+#db = cluster(format_data_3D(filtered_scaled_dataset), 0.13, 5)
+#labels = db.labels_
+#plot_3D_clusters(filtered_scaled_dataset, labels)
+
 	
