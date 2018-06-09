@@ -1,10 +1,13 @@
 # Lab3_2
-import StringIO
+import io
 import re
 
 punctuation = [',', '-', '"', "'", '*', '_', '\n']
 end_of_sentence = ['.', '!', '?']
 
+"""
+Taks file number and reads the whle file. Returns it as a string.
+"""
 def read_file(nr):
 	if nr < 10:
 		f = open('0' + str(nr) + '.txt', 'r')
@@ -12,6 +15,13 @@ def read_file(nr):
 		f = open(str(nr) + '.txt', 'r')
 	return f.read()
 
+
+"""
+Takes a text as a string. 
+Checks every character, removes special characters and lowers letters.
+Gets one sentence per row.
+Returns the clean text.
+"""
 def clean_text(text):
 	clean = ""
 	sen = ""
@@ -29,21 +39,35 @@ def clean_text(text):
 			sen += text[i]
 	return clean
 
+
+"""
+Takes a text as a string.
+Removes extra spaces and new lines. 
+Returns the clean text.
+"""
 def remove_space(text):
-	fixed1 = re.sub(' +', ' ', text)
-	fixed2 = re.sub('\n+', '\n', fixed1)
-	fixed3 = re.sub('\n ', '\n', fixed2)
+	fixed1 = re.sub(' +', ' ', text) #Remove multiple white spaces
+	fixed2 = re.sub('\n+', '\n', fixed1) #Remove multiple new lines
+	fixed3 = re.sub('\n ', '\n', fixed2) #Remove white space after new line
 	return fixed3 
 
+"""
+Takes a clean text as a string.
+Generates a table of all sentences as key.
+Returns the table.
+"""
 def generate_table(text):
 	table = {}
-	buf = StringIO.StringIO(text)
+	buf = io.StringIO(text)
 	for line in buf:
 		table[line[:-1]] = 1
 	return table
 
 #print(generate_table(remove_space(clean_text(text))))
 
+"""
+Returns a list of tables for all files.
+"""
 def get_all_tables():
 	tables = []
 	for i in range(1,11):
@@ -51,7 +75,8 @@ def get_all_tables():
 	return tables
 
 """
-Input one must be a number
+Takes a number.
+Compares that number of text with all the other texts.
 """
 def compare_one_to_all(one):
 	print("Comparing text nr " + str(one) + " with all other texts.")
@@ -66,9 +91,9 @@ def compare_one_to_all(one):
 				j = i+1
 				
 			if sentence in table.keys():
-				print("Plagiat! Sentence:")
-				print("\n" + sentence)
-				print("in text nr " + str(j+1))
+				print("\nPlagiat! Sentence:")
+				print(sentence)
+				print("In both text nr", j+1, "and nr", one)
 	return
 	
 print(compare_one_to_all(2))
