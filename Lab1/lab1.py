@@ -150,18 +150,6 @@ def count_consecutive(cons, n):
 	return con_ns
 
 """
-Scales dataset to values between 0 and 1
-Input: dataset with one or more dimensions
-Output: scaled dataset as list of lists
-"""
-def scale_data(d):
-	scaled_dataset = []
-	for dimension in d:
-		scaled_dataset.append([entry/max(dimension) for entry in dimension])
-	return scaled_dataset
-
-
-"""
 Generates dataset as lists with tree different characteristics.
 """	
 def create_dataset():
@@ -171,69 +159,12 @@ def create_dataset():
 
 	return (consec_2, consec_3, consec_5)
 
-"""
-Performs pca on 3D to 2D. 
-Input: dataset with three lists
-Output: two list with principal component 1 and 2
-"""
-def perform_pca(dataset):
-	# Standardizing the features
-	#print(dataset)
-	x = StandardScaler().fit_transform(dataset)
-	#print(x)
-	pca = PCA(n_components=2)
-	principalComponents = pca.fit_transform(x)
-	variance = pca.explained_variance_ratio_
-	print(pca.components_)
-	print(variance[0] + variance[1])
-	print("Ok!")
-	pc1 = []
-	pc2 = []
-	for elem in principalComponents:
-		pc1.append(elem[0])
-		pc2.append(elem[1])
-	#print(pc1)
-	return (pc1, pc2)
-
 
 """
-Takes two lists and zips it to one list of tuples
-"""
-def format_data_2D(x, y):
-	return list(zip(x, y))
-
-"""
-Takes dataset with three dimensions in separate lists and zips it to one list with 3-tuples.
-"""
-def format_data_3D(dataset):
-	return list(zip(dataset[0], dataset[1], dataset[2]))
-
-"""
-Takes dataset with three dimensions in separate lists and cluster labels. Zips it to one list with 4-tuples.
-"""
-def format_cluster_data_3D(dataset, labels):
-	return list(zip(dataset[0], dataset[1], dataset[2], labels))
-
-"""
-Clusters datapoints with DBScan.
-Input: coordinates as separate lists, epsilon and minimum points in cluster
-Output: db which contains labels on which cluster every point belongs to
-"""
-def cluster(coordinates, eps, min_samples):
-	db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
-	labels = db.labels_
-	print(labels)
-	n_clusters_ = len(set(labels)) - (1 if -1 else 0)
-	print('Estimated number of clusters: %d' % n_clusters_)
-	return db
-	#https://www.programcreek.com/python/example/103494/sklearn.cluster.DBSCAN
-
-
-"""
-2D-plots clusters.
+2D-plot.
 Input: separate lists with coordinates, list with labels and tuple of axis labels, and color of dots
 """
-def plot_2D_clusters(data_x, data_y, labels, axis_labels, color):
+def plot_2D(data_x, data_y, labels, axis_labels, color):
 	plt.scatter(data_x, data_y, marker='o', edgecolor='black', c=color)
 
 	# Add labels that do not overlap
@@ -245,20 +176,6 @@ def plot_2D_clusters(data_x, data_y, labels, axis_labels, color):
 	plt.xlabel(axis_labels[0])
 	plt.ylabel(axis_labels[1])
 	plt.show()
-
-"""
-3D-plots clusters.
-Input: dataset with three separate dimensions, list of cluster number
-"""
-def plot_3D_clusters(dataset, clusters):
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
-	ax.scatter(dataset[0], dataset[1], dataset[2], c=clusters)
-	ax.set_xlabel('X: C2')
-	ax.set_ylabel('Y: C3')
-	ax.set_zlabel('Z: C5')
-	plt.show()
-
 
 
 """
@@ -290,31 +207,112 @@ def remove_non_selected(dataset, keep):
 	return filtered_dataset
 
 
+# Generate the data of consecutive sequences (2, 3 and 5)
 dataset = create_dataset()
 
-scaled_dataset = scale_data(dataset)
-
+# Filter to remove the data points not to keep
 strd_dev = math.sqrt(0.5*0.5*200)
 keep = within_strd_dev(strd_dev, 200)
+filtered_dataset = remove_non_selected(dataset, keep)
 
-filtered_scaled_dataset = remove_non_selected(scaled_dataset, keep)
-#print(len(filtered_dataset[0]))
+# ***** 2D plot of 3 dimensions *****
+plot_2D(filtered_dataset[0], filtered_dataset[1], keep, ("X: C2", "Y:C3"), 'red')
+plot_2D(filtered_dataset[0], filtered_dataset[2], keep, ("X: C2", "Y:C5"), 'blue')
+plot_2D(filtered_dataset[1], filtered_dataset[2], keep, ("X: C3", "Y:C5"), 'green')
+
+
+"""
+Scales dataset to values between 0 and 1
+Input: dataset with one or more dimensions
+Output: scaled dataset as list of lists
+"""
+def scale_data(d):
+	scaled_dataset = []
+	for dimension in d:
+		scaled_dataset.append([entry/max(dimension) for entry in dimension])
+	return scaled_dataset
+
+
+"""
+Takes two lists and zips it to one list of tuples
+"""
+def format_data_2D(x, y):
+	return list(zip(x, y))
+
+"""
+Takes dataset with three dimensions in separate lists and zips it to one list with 3-tuples.
+"""
+def format_data_3D(dataset):
+	return list(zip(dataset[0], dataset[1], dataset[2]))
+
+"""
+Takes dataset with three dimensions in separate lists and cluster labels. Zips it to one list with 4-tuples.
+"""
+def format_cluster_data_3D(dataset, labels):
+	return list(zip(dataset[0], dataset[1], dataset[2], labels))
+
+
+"""
+Performs pca on 3D to 2D. 
+Input: dataset with three lists
+Output: two list with principal component 1 and 2
+"""
+def perform_pca(dataset):
+	# Standardizing the features
+	#print(dataset)
+	x = StandardScaler().fit_transform(dataset)
+	#print(x)
+	pca = PCA(n_components=2)
+	principalComponents = pca.fit_transform(x)
+	variance = pca.explained_variance_ratio_
+	print(pca.components_)
+	print(variance[0] + variance[1])
+	print("Ok!")
+	pc1 = []
+	pc2 = []
+	for elem in principalComponents:
+		pc1.append(elem[0])
+		pc2.append(elem[1])
+	#print(pc1)
+	return (pc1, pc2)
+
+
+"""
+Clusters datapoints with DBScan.
+Input: coordinates as separate lists, epsilon and minimum points in cluster
+Output: db which contains labels on which cluster every point belongs to
+"""
+def cluster(coordinates, eps, min_samples):
+	db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
+	labels = db.labels_
+	print(labels)
+	n_clusters_ = len(set(labels)) - (1 if -1 else 0)
+	print('Estimated number of clusters: %d' % n_clusters_)
+	return db
+	#https://www.programcreek.com/python/example/103494/sklearn.cluster.DBSCAN
+
+
+"""
+3D-plots clusters.
+Input: dataset with three separate dimensions, list of cluster number
+"""
+def plot_3D_clusters(dataset, clusters):
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	ax.scatter(dataset[0], dataset[1], dataset[2], c=clusters)
+	ax.set_xlabel('X: C2')
+	ax.set_ylabel('Y: C3')
+	ax.set_zlabel('Z: C5')
+	plt.show()
+
 
 
 # ***** PCA ******
 #pca = perform_pca(format_data_3D(filtered_dataset))
-#plot_2D_clusters(pca[0], pca[1], keep, ("X: Pca1", "Y:Pca2"), 'red')
-
-
-
-# ***** 2D plot of 3 dimensions *****
-plot_2D_clusters(filtered_scaled_dataset[0], filtered_scaled_dataset[1], keep, ("X: C2", "Y:C3"), 'red')
-plot_2D_clusters(filtered_scaled_dataset[0], filtered_scaled_dataset[2], keep, ("X: C2", "Y:C5"), 'blue')
-plot_2D_clusters(filtered_scaled_dataset[1], filtered_scaled_dataset[2], keep, ("X: C3", "Y:C5"), 'green')
+#plot_2D(pca[0], pca[1], keep, ("X: Pca1", "Y:Pca2"), 'red')
 
 # **** Clustering ******
+#scaled_dataset = scale_data(dataset)
 #db = cluster(format_data_3D(filtered_scaled_dataset), 0.13, 5)
 #labels = db.labels_
 #plot_3D_clusters(filtered_scaled_dataset, labels)
-
-	
