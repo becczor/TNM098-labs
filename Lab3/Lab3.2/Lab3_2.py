@@ -68,8 +68,6 @@ def generate_table(text):
 			pass#print(line)
 	return table
 
-#print(generate_table(remove_space(clean_text(text))))
-
 """
 Returns a list of tables for all files.
 """
@@ -84,15 +82,11 @@ Takes a number.
 Compares that number of text with all the other texts.
 """
 def compare_one_to_all(one):
-	print("Comparing text nr " + str(one) + " with all other texts.")
+	#print("Comparing text nr " + str(one) + " with all other texts.")
 	tables = get_all_tables() # From 0 to 9
-	#print(len(tables)) # 10
 
 	#Extract the text we want to compare 
 	text = tables[one-1].keys()
-
-	#aaa = [(i,x) for i, x in enumerate(tables) if i != one-1]
-	#print(len(aaa))
 
 	for sentence in text:
 		for i, table in enumerate(tables):
@@ -100,14 +94,12 @@ def compare_one_to_all(one):
 				pass
 			else:
 				if sentence in table.keys() and len(sentence) > 20:
-					#print("\nPlagiat! Sentence:")
+					print("\nPlagiat! Sentence:")
 					print("In both text nr", i+1, "and nr", one, ":")
 					print(sentence)
-					
-	return
 	
 for i in range(1,11):
-	print(compare_one_to_all(i))
+	compare_one_to_all(i)	
 
 time_elapsed = (time.clock() - time_start)
 print("Time:", time_elapsed, "seconds")
