@@ -1,3 +1,4 @@
+% Open all files as a cell
 numfiles = 12;
 images = cell(1, numfiles);
 
@@ -12,23 +13,30 @@ for i = 10:numfiles
 end
 
 %rgbImage = imread('01.jpg', 'jpg');
-%%
+
+%% Create feature vector
+% 1,2,3: Mean color content (RGB)
+% 4,5,6: Mean color in center (RGB)
+% 7: Luminance distribution in center
+F = zeros(7,12);
+%% Mean/average color content
 meanVector = zeros(3,12);
+% For every image, take the mean of the three channels
 for i = 1:12
-    meanVector(1,i) = meanColorChannel(images{i}(:,:,1));
-    meanVector(2,i) = meanColorChannel(images{i}(:,:,2));
-    meanVector(3,i) = meanColorChannel(images{i}(:,:,3));
+    meanVector(1,i) = mean2(images{i}(:,:,1));
+    meanVector(2,i) = mean2(images{i}(:,:,2));
+    meanVector(3,i) = mean2(images{i}(:,:,3));
 end
-
-%% Visa vilka färger som är genomsnittet
-
+% Add to feature vector
+F(1:3, :) = meanVector;
+%% Test of mean color value
 testImage = ones(100,100,3);
 
 testImage(:,:,1) = meanVector(1,1) / 255;
 testImage(:,:,2) = meanVector(2,1) / 255;
 testImage(:,:,3) = meanVector(3,1) / 255;
 
-%imshow(testImage)
+imshow(testImage)
 
 %% Colour distribution around central point
 % Find center points in all images
@@ -55,36 +63,24 @@ for i = 1:12
     %imshow(testImage)
     
 end
+% Add to featur vector
+F(4:6, :) = meanCenterVector;
 
 %% Luminance distribution
 lumVector = zeros(1,12);
 
 for i = 1:12
-    
     lumVector(i) = lumPointDist(images{i}, centers(1,i), centers(2,i), 100);
-    
-
 end
 
-%% Använd binärfilerna och gå igenom dem för att eventuellt hitta linjer. 
-% Börja från översta kanten och när en pixel hittas, se om det finns en
-% följande linje. 
+% Add to feature vector
+F(7, :) = lumVector(:);
 
+%% Calculate distance between feature vectors
+
+distances = zeros(1,12);
 for i = 1:12
-    %figure
-    image = rgb2gray(images{i});
-    BW = edge(image, 'approxcanny', [0.2, 0.7]);
-    %subplot(4,3,i)
-    %imshow(BW);
-end 
-% figure 
-% image2 = rgb2gray(images{1});
-% BW2 = edge(image2, 'canny');
-% imshow(BW2)
-
-%%
-
-
-
+    distances(i) = norm(F(:,7) - F(:,i));
+end
 
 
