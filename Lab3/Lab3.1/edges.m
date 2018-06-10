@@ -2,7 +2,7 @@
 % Börja från översta kanten och när en pixel hittas, se om det finns en
 % följande linje. 
 % https://se.mathworks.com/help/images/hough-transform.html
-I = rgb2gray(images{12});
+I = rgb2gray(images{3});
 BW = edge(I,'canny', [0.4, 0.5]);
 figure
 imshow(BW);
