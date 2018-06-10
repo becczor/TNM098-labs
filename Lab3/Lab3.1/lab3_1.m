@@ -18,7 +18,9 @@ end
 % 1,2,3: Mean color content (RGB)
 % 4,5,6: Mean color in center (RGB)
 % 7: Luminance distribution in center
-F = zeros(7,12);
+% 8,9: Angle and length for longest line
+% 10,11: Angle and length for the second longest line
+F = zeros(11,12);
 %% Mean/average color content
 meanVector = zeros(3,12);
 % For every image, take the mean of the three channels
@@ -76,11 +78,50 @@ end
 % Add to feature vector
 F(7, :) = lumVector(:);
 
-%% Calculate distance between feature vectors
+%% Använd binärfilerna och gå igenom dem för att eventuellt hitta linjer. 
+% Börja från översta kanten och när en pixel hittas, se om det finns en
+% följande linje. 
+% https://se.mathworks.com/help/images/hough-transform.html
+for i = 1:12
+    I = rgb2gray(images{i});
+    BW = edge(I,'canny', [0.4, 0.5]);
+    figure
+    imshow(BW);
 
+    % Compute the Hough transform of the binary image returned by edge.
+    [H,theta,rho] = hough(BW);
+
+    % Find the peaks in the Hough transform matrix, H, using the houghpeaks function.
+    P = houghpeaks(H,5,'threshold',ceil(0.3*max(H(:))));
+
+    % Find lines in the image using the houghlines function.
+    lines = houghlines(BW,theta,rho,P,'FillGap',5,'MinLength',7);
+
+    % Calculate the angles for all lines compared to x-axis, and length of
+    % them
+    N = length(lines);
+    angles = zeros(N,2);
+    for k = 1:N
+       a = lines(k).point2(1) - lines(k).point1(1);
+       b = lines(k).point2(2) - lines(k).point1(2);
+       c = sqrt(a^2 + b^2);
+
+       angles(k,1) = rad2deg(acos(a/c)); % Angle from line to x-axis
+       angles(k,2) = c; % Length of line
+    end
+    % Sort to only use the two longest lines
+    sorted_angles = sortrows(angles, 2, 'descend');
+    
+    % Add to feature vector
+    F(8,i) = sorted_angles(1,1);
+    F(9,i) = sorted_angles(1,2);
+    F(10,i) = sorted_angles(2,1);
+    F(11,i) = sorted_angles(2,2);
+end
+%% Calculate distance between feature vectors
 distances = zeros(1,12);
 for i = 1:12
-    distances(i) = norm(F(:,7) - F(:,i));
+    distances(i) = norm(F(:,3) - F(:,i));
 end
 
 
