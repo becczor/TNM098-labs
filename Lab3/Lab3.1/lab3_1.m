@@ -20,7 +20,9 @@ end
 % 7: Luminance distribution in center
 % 8,9: Angle and length for longest line
 % 10,11: Angle and length for the second longest line
-F = zeros(11,12);
+% 12,13: Angle and length for the third longest line
+% 14,15: Angle and length for the fourth longest line
+F = zeros(15,12);
 %% Mean/average color content
 meanVector = zeros(3,12);
 % For every image, take the mean of the three channels
@@ -85,8 +87,8 @@ F(7, :) = lumVector(:);
 for i = 1:12
     I = rgb2gray(images{i});
     BW = edge(I,'canny', [0.4, 0.5]);
-    figure
-    imshow(BW);
+    %figure
+    %imshow(BW);
 
     % Compute the Hough transform of the binary image returned by edge.
     [H,theta,rho] = hough(BW);
@@ -113,15 +115,19 @@ for i = 1:12
     sorted_angles = sortrows(angles, 2, 'descend');
     
     % Add to feature vector
-    F(8,i) = sorted_angles(1,1);
-    F(9,i) = sorted_angles(1,2);
-    F(10,i) = sorted_angles(2,1);
-    F(11,i) = sorted_angles(2,2);
+    F(8,i) = 3*sorted_angles(1,1);
+    F(9,i) = 3*sorted_angles(1,2);
+    F(10,i) = 3*sorted_angles(2,1);
+    F(11,i) = 3*sorted_angles(2,2);
+    F(12,i) = 3*sorted_angles(3,1);
+    F(13,i) = 3*sorted_angles(3,2);
+    F(14,i) = 3*sorted_angles(4,1);
+    F(15,i) = 3*sorted_angles(4,2);
 end
 %% Calculate distance between feature vectors
-distances = zeros(1,12);
-for i = 1:12
-    distances(i) = norm(F(:,3) - F(:,i));
+distances = zeros(12,12);
+for j = 1:12
+    for i = 1:12
+        distances(j,i) = round(norm(F(:,j) - F(:,i)),1);
+    end
 end
-
-
