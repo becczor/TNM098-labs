@@ -836,24 +836,26 @@ def plot_categorized(param, x, y):
 	plt.show()
 
 def plot_animated(x, y):
-	fig, ax = plt.subplots()
 
-	#x = np.arange(0, 2*np.pi, 0.01)
-	line, = ax.plot(x, y)
+	def update_line(num, data, line):
+		#print(data[..., :num])
+		line.set_data(data[..., :num])
+		return line,
 
+	fig1 = plt.figure()
 
-	def animate(i):
-	    line.set_ydata(y[i])  # update the data
-	    return line,
+	data = np.array([x, y])
+	#print(data)
+	l, = plt.plot([], [], 'r-')
+	plt.xlim(0, 1600)
+	plt.ylim(-200, 1000)
+	plt.xlabel('x')
+	plt.title('test')
+	line_ani = animation.FuncAnimation(fig1, update_line, len(x), fargs=(data, l),
+	                                   interval=10, blit=True)
 
+	# To save the animation, use the command: line_ani.save('lines.mp4')
 
-	# Init only required for blitting to give a clean slate.
-	def init():
-	    line.set_ydata(np.ma.array(x, mask=True))
-	    return line,
-
-	ani = animation.FuncAnimation(fig, animate, np.arange(1, 200), init_func=init,
-	                              interval=25, blit=True)
 	plt.show()
 
 def format_cluster_data(lat, lon):
@@ -880,8 +882,11 @@ separate_data(data)
 #plot_categorized(GazeEventDuration, GazePointX, GazePointY)
 
 plot_animated(GazePointX, GazePointY)
+# print(min(GazePointX))
+# print(max(GazePointX))
 
-
+# print(min(GazePointY))
+# print(max(GazePointY))
 
 
 
