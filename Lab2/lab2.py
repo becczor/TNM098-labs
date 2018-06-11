@@ -781,11 +781,11 @@ def separate_data(data):
 def plot_all(x, y):
 	plt.scatter(x, y, marker='o', s=GazeEventDuration, edgecolor='black')
 	#plt.axis([0, 6, 0, 20])
-	plt.ylabel(str(x))
-	plt.xlabel(str(y))
+	plt.ylabel("x")
+	plt.xlabel("y")
 	plt.show()
 	
-def plot_categorized(param, x, y):
+def plot_timewise(param, x, y):
 	x_100 = []
 	x_300 = []
 	x_500 = []
@@ -858,6 +858,14 @@ def plot_animated(x, y):
 
 	plt.show()
 
+def plot_clustered(x, y, c):
+	plt.scatter(x, y, marker='o', c=c, cmap='Set1', edgecolor='black')
+	#plt.axis([0, 6, 0, 20])
+	plt.xlabel("x")
+	plt.ylabel("y")
+	plt.title('Clustered regions of interest')
+	plt.show()
+
 def format_cluster_data(lat, lon):
 	return list(zip(lat, lon))
 
@@ -865,28 +873,34 @@ def format_cluster_data(lat, lon):
 def cluster(coordinates, eps, min_samples):
 	db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
 	labels = db.labels_
-	print(labels)
 	n_clusters_ = len(set(labels)) - (1 if -1 else 0)
 	print('Estimated number of clusters: %d' % n_clusters_)
 	return db
 	#https://www.programcreek.com/python/example/103494/sklearn.cluster.DBSCAN
 
-	
+def count(l):
+	table = {}
+	for elem in l:
+		if elem not in table:
+			table[elem] = 1
+		else:
+			table[elem] += 1
+	return table
+
+
 separate_data(data)
 
-#db = cluster(format_cluster_data(GazePointX, GazePointY), 60, 10)
+# **** Clustering ******
+db = cluster(format_cluster_data(GazePointX, GazePointY), 50, 17)
+clusters = db.labels_
+plot_clustered(GazePointX, GazePointY, clusters)
 
+print(count(clusters))
 
-#plot_all(GazePointX, GazePointY)
+#plot_timewise(GazeEventDuration, GazePointX, GazePointY)
 
-#plot_categorized(GazeEventDuration, GazePointX, GazePointY)
+#plot_animated(GazePointX, GazePointY)
 
-plot_animated(GazePointX, GazePointY)
-# print(min(GazePointX))
-# print(max(GazePointX))
-
-# print(min(GazePointY))
-# print(max(GazePointY))
 
 
 
