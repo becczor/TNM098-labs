@@ -779,10 +779,12 @@ def separate_data(data):
 	#print(RecordingTimestamp)
 	
 def plot_all(x, y):
-	plt.scatter(x, y, marker='o', s=GazeEventDuration, edgecolor='black')
+	plt.scatter(x, y, marker='o', edgecolor='black')
 	#plt.axis([0, 6, 0, 20])
 	plt.ylabel("x")
 	plt.xlabel("y")
+	plt.xlim(0, 1600)
+	plt.ylim(-200, 1000)
 	plt.show()
 	
 def plot_timewise(param, x, y):
@@ -833,6 +835,8 @@ def plot_timewise(param, x, y):
 	plt.plot(x_max, y_max, 'ko')
 	plt.ylabel("y")
 	plt.xlabel("x")
+	plt.xlim(0, 1600)
+	plt.ylim(-200, 1000)
 	plt.show()
 
 def plot_animated(x, y):
@@ -866,6 +870,15 @@ def plot_clustered(x, y, c):
 	plt.title('Clustered regions of interest')
 	plt.show()
 
+def plot_one_cluster(x, y, c, n):
+	new_x = []
+	new_y = []
+	for ex, ey, ec in zip(x,y,c):
+		if ec == n:
+			new_x.append(ex)
+			new_y.append(ey)
+	plot_all(new_x, new_y)
+
 def format_cluster_data(lat, lon):
 	return list(zip(lat, lon))
 
@@ -887,19 +900,35 @@ def count(l):
 			table[elem] += 1
 	return table
 
+def check_times(times, clusters):
+	table = {}
+	# Go through all clusters
+	for i in range(0, max(clusters)+1):
+		cluster_times = []
+		# Get all times for this cluster
+		for c, t in zip(clusters, times):
+			if c == i:
+				cluster_times.append(round(t/(max(times)/100), 2))
+		table[i] = cluster_times
+	return table
 
 separate_data(data)
 
 # **** Clustering ******
 db = cluster(format_cluster_data(GazePointX, GazePointY), 50, 17)
 clusters = db.labels_
-plot_clustered(GazePointX, GazePointY, clusters)
+times = check_times(RecordingTimestamp, clusters)
 
 print(count(clusters))
+print(times[6])
 
+#plot_clustered(GazePointX, GazePointY, clusters)
+plot_animated(GazePointX, GazePointY)
+
+#plot_one_cluster(GazePointX, GazePointY, clusters, 6)
 #plot_timewise(GazeEventDuration, GazePointX, GazePointY)
 
-#plot_animated(GazePointX, GazePointY)
+
 
 
 
