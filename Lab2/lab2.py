@@ -744,11 +744,13 @@ data = [127, 1, 23, 37, 555, 346,
 280794, 743, 20, 84247, 1121, 448, 
 280814, 744, 727, 84253, 523, 249]
 
+
+import numpy as np
+import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import copy
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
-
 
 RecordingTimestamp = []
 FixationIndex = []
@@ -773,10 +775,8 @@ def separate_data(data):
 		elif i == 6:
 			GazePointY.append(elem)
 			i = 0
-		i += 1
-			
+		i += 1	
 	#print(RecordingTimestamp)
-	return
 	
 def plot_all(x, y):
 	plt.scatter(x, y, marker='o', s=GazeEventDuration, edgecolor='black')
@@ -835,33 +835,51 @@ def plot_categorized(param, x, y):
 	plt.xlabel("x")
 	plt.show()
 
+def plot_animated(x, y):
+	fig, ax = plt.subplots()
+
+	#x = np.arange(0, 2*np.pi, 0.01)
+	line, = ax.plot(x, y)
+
+
+	def animate(i):
+	    line.set_ydata(y[i])  # update the data
+	    return line,
+
+
+	# Init only required for blitting to give a clean slate.
+	def init():
+	    line.set_ydata(np.ma.array(x, mask=True))
+	    return line,
+
+	ani = animation.FuncAnimation(fig, animate, np.arange(1, 200), init_func=init,
+	                              interval=25, blit=True)
+	plt.show()
+
 def format_cluster_data(lat, lon):
-	return [elem for elem in zip(lat, lon)]
+	return list(zip(lat, lon))
 
 
 def cluster(coordinates, eps, min_samples):
 	db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
+	labels = db.labels_
+	print(labels)
+	n_clusters_ = len(set(labels)) - (1 if -1 else 0)
+	print('Estimated number of clusters: %d' % n_clusters_)
 	return db
 	#https://www.programcreek.com/python/example/103494/sklearn.cluster.DBSCAN
 
 	
 separate_data(data)
 
-db = cluster(format_cluster_data(GazePointX, GazePointY), 60, 10)
-
-print(db)
-
-labels = db.labels_
-print(labels)
-n_clusters_ = len(set(labels)) - (1 if -1 else 0)
-print('Estimated number of clusters: %d' % n_clusters_)
+#db = cluster(format_cluster_data(GazePointX, GazePointY), 60, 10)
 
 
 #plot_all(GazePointX, GazePointY)
 
 #plot_categorized(GazeEventDuration, GazePointX, GazePointY)
 
-
+plot_animated(GazePointX, GazePointY)
 
 
 
