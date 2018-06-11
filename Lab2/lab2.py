@@ -1,4 +1,3 @@
-#RecordingTimestamp, FixationIndex, GazeEventDuration(mS), GazePointIndex, GazePointX(px), GazePointY(px), 
 data = [127, 1, 23, 37, 555, 346, 
 137, 2, 40, 40, 487, 221, 
 176, 3, 200, 52, 500, 264, 
@@ -743,6 +742,7 @@ data = [127, 1, 23, 37, 555, 346,
 280534, 742, 260, 84169, 506, 258, 
 280794, 743, 20, 84247, 1121, 448, 
 280814, 744, 727, 84253, 523, 249]
+#RecordingTimestamp, FixationIndex, GazeEventDuration(mS), GazePointIndex, GazePointX(px), GazePointY(px)
 
 
 import numpy as np
@@ -786,58 +786,7 @@ def plot_all(x, y):
 	plt.xlim(0, 1600)
 	plt.ylim(-200, 1000)
 	plt.show()
-	
-def plot_timewise(param, x, y):
-	x_100 = []
-	x_300 = []
-	x_500 = []
-	x_750 = []
-	x_1000 = []
-	x_2000 = []
-	x_max = []
-	y_100 = []
-	y_300 = []
-	y_500 = []
-	y_750 = []
-	y_1000 = []
-	y_2000 = []
-	y_max = []
-	
-	for i in range(0, len(param)):
-		if param[i] < 100:
-			x_100.append(x[i])
-			y_100.append(y[i])
-		elif param[i] in range(100,299):
-			x_300.append(x[i])
-			y_300.append(y[i])
-		elif param[i] in range(300, 499):
-			x_500.append(x[i])
-			y_500.append(y[i])
-		elif param[i] in range(500, 750):
-			x_750.append(x[i])
-			y_750.append(y[i])
-		elif param[i] in range(750, 999):
-			x_1000.append(x[i])
-			y_1000.append(y[i])
-		elif param[i] in range(1000,1999):
-			x_2000.append(x[i])
-			y_2000.append(y[i])
-		else:
-			x_max.append(x[i])
-			y_max.append(y[i])
-	
-	plt.plot(x_100, y_100, 'wo')
-	plt.plot(x_300, y_300, 'co')
-	plt.plot(x_500, y_500, 'ro')
-	plt.plot(x_750, y_750, 'mo')
-	plt.plot(x_1000, y_1000, 'go')
-	plt.plot(x_2000, y_2000, 'bo')
-	plt.plot(x_max, y_max, 'ko')
-	plt.ylabel("y")
-	plt.xlabel("x")
-	plt.xlim(0, 1600)
-	plt.ylim(-200, 1000)
-	plt.show()
+
 
 def plot_animated(x, y):
 
@@ -850,14 +799,13 @@ def plot_animated(x, y):
 
 	data = np.array([x, y])
 	#print(data)
-	l, = plt.plot([], [], 'r-')
+	l, = plt.plot([], [], 'r--')
 	plt.xlim(0, 1600)
 	plt.ylim(-200, 1000)
 	plt.xlabel('x')
 	plt.title('test')
 	line_ani = animation.FuncAnimation(fig1, update_line, len(x), fargs=(data, l),
-	                                   interval=10, blit=True)
-
+	                                   interval=30, blit=True)
 	# To save the animation, use the command: line_ani.save('lines.mp4')
 
 	plt.show()
@@ -886,6 +834,7 @@ def format_cluster_data(lat, lon):
 def cluster(coordinates, eps, min_samples):
 	db = DBSCAN(eps=eps, min_samples=min_samples).fit(coordinates)
 	labels = db.labels_
+	print(labels)
 	n_clusters_ = len(set(labels)) - (1 if -1 else 0)
 	print('Estimated number of clusters: %d' % n_clusters_)
 	return db
@@ -900,16 +849,17 @@ def count(l):
 			table[elem] += 1
 	return table
 
-def check_times(times, clusters):
+def check_occurences(occs, clusters):
 	table = {}
 	# Go through all clusters
 	for i in range(0, max(clusters)+1):
-		cluster_times = []
-		# Get all times for this cluster
-		for c, t in zip(clusters, times):
+		cluster_occs = []
+		# Get all occ for this cluster
+		for c, t in zip(clusters, occs):
 			if c == i:
-				cluster_times.append(round(t/(max(times)/100), 2))
-		table[i] = cluster_times
+				cluster_occs.append((t/(max(occs)/100), 2))
+				#cluster_occs.append(t)
+		table[i] = cluster_occs
 	return table
 
 separate_data(data)
@@ -917,11 +867,15 @@ separate_data(data)
 # **** Clustering ******
 db = cluster(format_cluster_data(GazePointX, GazePointY), 50, 17)
 clusters = db.labels_
-times = check_times(RecordingTimestamp, clusters)
+times = check_occurences(RecordingTimestamp, clusters)
 
-print(count(clusters))
-print(times[6])
+durations = check_occurences(GazeEventDuration, clusters)
 
+#print(sorted(durations[2]))
+#for i in range(7):
+	#print(round(sum(durations[i])/len(durations[i]),2))
+
+print(RecordingTimestamp[114])
 #plot_clustered(GazePointX, GazePointY, clusters)
 plot_animated(GazePointX, GazePointY)
 
